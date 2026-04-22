@@ -1,18 +1,14 @@
 import express from 'express';
-import LikeCommentHandler from './handler.js';
-import authMiddleware from '../../middlewares/authMiddleware.js';
+import authMiddleware from '../../_middleware/authMiddleware.js';
 
-const routes = (container) => {
-  const router = express.Router();
-  const handler = new LikeCommentHandler(container);
+const router = express.Router();
 
+export default (handler) => {
   router.put(
-    '/threads/:threadId/comments/:commentId/likes',
+    '/:threadId/comments/:commentId/likes',
     authMiddleware,
     handler.putLikeCommentHandler
   );
 
   return router;
 };
-
-export default routes;

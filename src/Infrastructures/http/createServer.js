@@ -7,6 +7,7 @@ import CommentRepositoryPostgres from '../repository/CommentRepositoryPostgres.j
 import ReplyRepositoryPostgres from '../repository/ReplyRepositoryPostgres.js';
 import UserRepositoryPostgres from '../repository/UserRepositoryPostgres.js';
 import AuthenticationRepositoryPostgres from '../repository/AuthenticationRepositoryPostgres.js';
+import UserCommentLikeRepositoryPostgres from '../repository/UserCommentLikeRepositoryPostgres.js';
 
 // Use Cases
 import AddThreadUseCase from '../../Applications/use_case/AddThreadUseCase.js';
@@ -19,6 +20,7 @@ import AddUserUseCase from '../../Applications/use_case/AddUserUseCase.js';
 import LoginUserUseCase from '../../Applications/use_case/LoginUserUseCase.js';
 import LogoutUserUseCase from '../../Applications/use_case/LogoutUserUseCase.js';
 import RefreshAuthenticationUseCase from '../../Applications/use_case/RefreshAuthenticationUseCase.js';
+import ToggleLikeCommentUseCase from '../../Applications/use_case/ToggleLikeCommentUseCase.js';
 
 // Routes
 import threads from '../../Interfaces/http/api/threads/index.js';
@@ -52,6 +54,7 @@ const createServer = () => {
   const replyRepository = new ReplyRepositoryPostgres(pool);
   const userRepository = new UserRepositoryPostgres(pool, nanoid);
   const authenticationRepository = new AuthenticationRepositoryPostgres(pool);
+  const userCommentLikeRepository = new UserCommentLikeRepositoryPostgres(pool);
 
   const passwordHash = new BcryptPasswordHash();
   const tokenManager = new JwtTokenManager();
@@ -112,6 +115,12 @@ const createServer = () => {
       authenticationRepository,
     }),
 
+    ToggleLikeCommentUseCase: new ToggleLikeCommentUseCase({
+      userCommentLikeRepository,
+      commentRepository,
+      threadRepository,
+    }),
+
     JwtTokenManager: tokenManager,
   };
 
@@ -152,7 +161,7 @@ const createServer = () => {
   app.use('/threads', threads(container));
   app.use('/threads', comments(container));
   app.use('/threads', replies(container));
-  app.use('/threads', likes);
+  app.use('/threads', likes(container));
 
   // ======================
   // 404 Handler
