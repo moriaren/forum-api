@@ -15,7 +15,14 @@ class DetailThread {
   _verifyPayload(payload) {
     const { id, title, body, date, username, comments } = payload;
 
-    if (!id || !title || !body || !date || !username || !comments) {
+    if (
+      id === undefined ||
+      title === undefined ||
+      body === undefined ||
+      date === undefined ||
+      username === undefined ||
+      comments === undefined
+    ) {
       throw new Error('DETAIL_THREAD.NOT_CONTAIN_NEEDED_PROPERTY');
     }
 

@@ -14,28 +14,27 @@ describe('GetThreadDetailUseCase', () => {
         body: 'body',
         date: new Date().toISOString(),
         username: 'john',
+        comments: [
+          {
+            id: 'comment-1',
+            content: 'comment 1',
+            date: new Date().toISOString(),
+            username: 'john',
+            // eslint-disable-next-line camelcase
+            is_delete: false,
+            likeCount: 1,
+          },
+          {
+            id: 'comment-2',
+            content: 'comment 2',
+            date: new Date().toISOString(),
+            username: 'doe',
+            // eslint-disable-next-line camelcase
+            is_delete: true,
+            likeCount: 0,
+          },
+        ],
       }),
-    };
-
-    const mockCommentRepo = {
-      getCommentsByThreadId: vi.fn().mockResolvedValue([
-        {
-          id: 'comment-1',
-          content: 'comment 1',
-          date: new Date().toISOString(),
-          username: 'john',
-          // eslint-disable-next-line camelcase
-          is_delete: false,
-        },
-        {
-          id: 'comment-2',
-          content: 'comment 2',
-          date: new Date().toISOString(),
-          username: 'doe',
-          // eslint-disable-next-line camelcase
-          is_delete: true,
-        },
-      ]),
     };
 
     const mockReplyRepo = {
@@ -63,7 +62,6 @@ describe('GetThreadDetailUseCase', () => {
 
     const useCase = new GetThreadDetailUseCase({
       threadRepository: mockThreadRepo,
-      commentRepository: mockCommentRepo,
       replyRepository: mockReplyRepo,
     });
 
@@ -77,9 +75,6 @@ describe('GetThreadDetailUseCase', () => {
       .toHaveBeenCalledWith(threadId);
 
     expect(mockThreadRepo.getThreadById)
-      .toHaveBeenCalledWith(threadId);
-
-    expect(mockCommentRepo.getCommentsByThreadId)
       .toHaveBeenCalledWith(threadId);
 
     expect(mockReplyRepo.getRepliesByCommentIds)
@@ -98,6 +93,7 @@ describe('GetThreadDetailUseCase', () => {
           username: 'john',
           date: normalized.comments[0].date,
           content: 'comment 1',
+          likeCount: 1,
           replies: [
             {
               id: 'reply-1',
@@ -118,6 +114,7 @@ describe('GetThreadDetailUseCase', () => {
           username: 'doe',
           date: normalized.comments[1].date,
           content: '**komentar telah dihapus**',
+          likeCount: 0,
           replies: [],
         },
       ],

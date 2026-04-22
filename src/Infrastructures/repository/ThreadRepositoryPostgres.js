@@ -56,7 +56,45 @@ class ThreadRepositoryPostgres extends ThreadRepository {
       throw new NotFoundError('THREAD.NOT_FOUND');
     }
 
-    return rows[0];
+    const thread = rows[0];
+
+    const commentsResult = await this._pool.query({
+      text: `
+        SELECT 
+          c.id,
+          c.content,
+          c.date,
+          c.is_delete,
+          u.username,
+          (
+            SELECT COUNT(*) 
+            FROM user_comment_likes l 
+            WHERE l.comment_id = c.id
+          ) AS like_count
+        FROM comments c
+        LEFT JOIN users u ON u.id = c.owner
+        WHERE c.thread_id = $1
+        ORDER BY c.date ASC
+      `,
+      values: [threadId],
+    });
+
+    const comments = commentsResult.rows.map((comment) => ({
+      id: comment.id,
+      username: comment.username,
+      date: comment.date,
+      content: comment.is_delete
+        ? '**komentar telah dihapus**'
+        : comment.content,
+      // eslint-disable-next-line camelcase
+      is_delete: comment.is_delete,
+      likeCount: Number(comment.like_count) || 0
+    }));
+
+    return {
+      ...thread,
+      comments,
+    };
   }
 }
 

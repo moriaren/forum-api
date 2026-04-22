@@ -22,7 +22,8 @@ describe('DetailComment entity', () => {
       date: '2024-01-01',
       content: 'comment',
       isDelete: false,
-      replies: 'not-array', // wrong
+      likeCount: 0,
+      replies: 'not-array',
     };
 
     expect(() => new DetailComment(payload))
@@ -36,6 +37,7 @@ describe('DetailComment entity', () => {
       date: '2024-01-01',
       content: 'comment',
       isDelete: false,
+      likeCount: 0,
       replies: [],
     };
 
@@ -52,6 +54,7 @@ describe('DetailComment entity', () => {
       date: '2024-01-01',
       content: 'comment',
       isDelete: true,
+      likeCount: 0,
       replies: [],
     };
 
@@ -59,5 +62,20 @@ describe('DetailComment entity', () => {
 
     expect(detailComment.content)
       .toBe('**komentar telah dihapus**');
+  });
+
+  it('should throw error when likeCount is not number', () => {
+    const payload = {
+      id: 'comment-1',
+      username: 'john',
+      date: '2024-01-01',
+      content: 'comment',
+      isDelete: false,
+      likeCount: '2',
+      replies: [],
+    };
+
+    expect(() => new DetailComment(payload))
+      .toThrowError('DETAIL_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION');
   });
 });
