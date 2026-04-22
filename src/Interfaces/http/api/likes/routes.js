@@ -1,6 +1,6 @@
 import express from 'express';
 import LikeCommentHandler from './handler.js';
-import authMiddleware from '../../../middlewares/authMiddleware.js';
+import authMiddleware from '../../middlewares/authMiddleware.js';
 
 const routes = (container) => {
   const router = express.Router();
