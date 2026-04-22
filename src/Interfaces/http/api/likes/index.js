@@ -1,5 +1,7 @@
+import LikeCommentHandler from './handler.js';
 import routes from './routes.js';
 
-const likesRoutes = (container) => routes(container);
-
-export default likesRoutes;
+export default (container) => {
+  const handler = new LikeCommentHandler(container);
+  return routes(handler);
+};
