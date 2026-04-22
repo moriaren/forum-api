@@ -1,5 +1,5 @@
 import express from 'express';
-import authMiddleware from '../../_middleware/authMiddleware.js';
+import authMiddleware from '../../_middlewares/authMiddleware.js';
 
 export default (handler) => {
   const router = express.Router();
