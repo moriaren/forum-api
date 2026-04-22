@@ -1,5 +1,5 @@
-describe('CI Scenario - Fail First', () => {
-  it('should fail intentionally', () => {
-    expect(1 + 1).toBe(3); // ❌ sengaja salah
+describe('CI Scenario - Fix', () => {
+  it('should pass after fix', () => {
+    expect(1 + 1).toBe(2); // ✅ benar
   });
 });
