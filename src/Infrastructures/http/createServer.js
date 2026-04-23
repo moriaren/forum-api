@@ -54,7 +54,7 @@ const createServer = () => {
   const replyRepository = new ReplyRepositoryPostgres(pool);
   const userRepository = new UserRepositoryPostgres(pool, nanoid);
   const authenticationRepository = new AuthenticationRepositoryPostgres(pool);
-  const userCommentLikeRepository = new UserCommentLikeRepositoryPostgres(pool);
+  const userCommentLikeRepository = new UserCommentLikeRepositoryPostgres(pool, nanoid);
 
   const passwordHash = new BcryptPasswordHash();
   const tokenManager = new JwtTokenManager();

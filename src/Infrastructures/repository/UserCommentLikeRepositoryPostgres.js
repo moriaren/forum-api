@@ -1,8 +1,7 @@
-import UserCommentLikeRepository from '../../Domains/userCommentLikes/UserCommentLikeRepository.js';
+import { nanoid } from 'nanoid';
 
-class UserCommentLikeRepositoryPostgres extends UserCommentLikeRepository {
-  constructor(pool, idGenerator) {
-    super();
+class UserCommentLikeRepositoryPostgres {
+  constructor(pool, idGenerator = nanoid) {
     this._pool = pool;
     this._idGenerator = idGenerator;
   }
