@@ -28,7 +28,7 @@ class GetThreadDetailUseCase {
         : [];
 
     const repliesMap = replies.reduce((acc, reply) => {
-      const key = reply.comment_id;
+      const key = reply.comment_id ?? reply.commentId;
 
       if (!acc[key]) acc[key] = [];
       acc[key].push(reply);
@@ -44,16 +44,16 @@ class GetThreadDetailUseCase {
             username: reply.username,
             date: this._normalizeDate(reply.date),
             content: reply.content,
-            isDelete: reply.is_delete,
+            isDelete: reply.is_delete ?? false,
           })
       );
 
       return new DetailComment({
         id: comment.id,
-        username: comment.username,
-        date: this._normalizeDate(comment.date),
+        username: comment.username ?? 'unknown',
+        date: this._normalizeDate(comment.date || new Date()),
         content: comment.content,
-        isDelete: comment.is_delete,
+        isDelete: comment.is_delete ?? false,
         likeCount: Number(comment.likeCount) || 0,
         replies: mappedReplies,
       });
