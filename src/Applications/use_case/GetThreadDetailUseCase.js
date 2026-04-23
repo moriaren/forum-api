@@ -17,7 +17,8 @@ class GetThreadDetailUseCase {
     await this._threadRepository.verifyThreadExists(threadId);
 
     const thread = await this._threadRepository.getThreadById(threadId);
-    const comments = await this._commentRepository.getCommentsByThreadId(threadId);
+
+    const comments = thread.comments || [];
 
     const commentIds = comments.map((c) => c.id);
 
@@ -53,7 +54,7 @@ class GetThreadDetailUseCase {
         date: this._normalizeDate(comment.date),
         content: comment.content,
         isDelete: comment.is_delete,
-        likeCount: comment.likeCount ?? 0,
+        likeCount: Number(comment.likeCount) || 0,
         replies: mappedReplies,
       });
     });
