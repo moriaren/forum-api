@@ -7,8 +7,15 @@ class LikeCommentHandler {
 
   async putLikeCommentHandler(req, res, next) {
     try {
-      const userId = req.auth.credentials.id;
+      const { id: userId } = req.auth?.credentials || {};
       const { threadId, commentId } = req.params;
+
+      if (!userId) {
+        return res.status(401).json({
+          status: 'fail',
+          message: 'Missing authentication',
+        });
+      }
 
       const toggleLikeCommentUseCase = this._container.getInstance(
         'ToggleLikeCommentUseCase'
