@@ -1,3 +1,7 @@
+![Node.js](https://img.shields.io/badge/node.js-18-green)
+![PostgreSQL](https://img.shields.io/badge/postgresql-db-blue)
+![CI/CD](https://img.shields.io/badge/CI/CD-GitHub%20Actions-orange)
+
 # 🚀 Forum API
 
 RESTful API untuk aplikasi forum diskusi yang dibangun menggunakan **Node.js**, **Express.js**, dan **PostgreSQL**. API ini mendukung fitur thread, komentar, balasan, serta sistem like/unlike komentar.
