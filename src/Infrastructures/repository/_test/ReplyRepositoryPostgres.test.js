@@ -149,4 +149,37 @@ describe('ReplyRepositoryPostgres', () => {
     expect(replies[0].id).toBe(replyId);
     expect(replies[0].username).toBeDefined();
   });
+
+  it('should return empty array when commentIds is empty', async () => {
+    const replies = await repo.getRepliesByCommentIds([]);
+
+    expect(replies).toEqual([]);
+  });
+
+  it('should return empty array when commentIds is undefined', async () => {
+    const replies = await repo.getRepliesByCommentIds();
+
+    expect(replies).toEqual([]);
+  });
+
+  it('should clean replies by comment id correctly', async () => {
+    await setup();
+
+    await RepliesTableTestHelper.addReply({
+      id: 'reply-1',
+      content: 'reply',
+      commentId,
+      owner: userId,
+    });
+
+    let replies = await RepliesTableTestHelper.findReplyById('reply-1');
+
+    expect(replies).toHaveLength(1);
+
+    await RepliesTableTestHelper.cleanByCommentId(commentId);
+
+    replies = await RepliesTableTestHelper.findReplyById('reply-1');
+
+    expect(replies).toHaveLength(0);
+  });
 });

@@ -51,4 +51,27 @@ describe('POST /threads/:threadId/comments', () => {
     expect(response.body.status).toBe('success');
     expect(response.body.data.addedComment).toHaveProperty('id');
   });
+
+  it('should response 401 when request without authentication', async () => {
+    const response = await request(server)
+      .post('/threads/thread-123/comments')
+      .send({
+        content: 'comment test',
+      });
+
+    expect(response.status).toBe(401);
+    expect(response.body.status).toBe('fail');
+    expect(response.body.message).toBe('Missing authentication');
+  });
+
+  it('should handle server error correctly', async () => {
+    const response = await request(server)
+      .post('/threads/thread-not-found/comments')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        content: 'comment test',
+      });
+
+    expect(response.status).toBeGreaterThanOrEqual(400);
+  });
 });

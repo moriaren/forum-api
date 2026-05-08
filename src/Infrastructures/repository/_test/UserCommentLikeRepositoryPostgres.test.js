@@ -5,6 +5,7 @@ import UserCommentLikeRepositoryPostgres from '../UserCommentLikeRepositoryPostg
 import UsersTableTestHelper from '../../../../tests/UsersTableTestHelper.js';
 import ThreadsTableTestHelper from '../../../../tests/ThreadsTableTestHelper.js';
 import CommentsTableTestHelper from '../../../../tests/CommentsTableTestHelper.js';
+import UserCommentLikesTableTestHelper from '../../../../tests/UserCommentLikesTableTestHelper.js';
 
 describe('UserCommentLikeRepositoryPostgres', () => {
   let repository;
@@ -65,26 +66,29 @@ describe('UserCommentLikeRepositoryPostgres', () => {
 
     await repository.addLike('user-1', 'comment-1');
 
-    const result = await pool.query({
-      text: 'SELECT * FROM user_comment_likes WHERE user_id = $1 AND comment_id = $2',
-      values: ['user-1', 'comment-1'],
-    });
+    const likes = await UserCommentLikesTableTestHelper.findLike(
+      'user-1',
+      'comment-1'
+    );
 
-    expect(result.rowCount).toBe(1);
+    expect(likes).toHaveLength(1);
   });
 
   it('should delete like correctly', async () => {
     await setupData();
 
-    await repository.addLike('user-1', 'comment-1');
+    await UserCommentLikesTableTestHelper.addLike({
+      userId: 'user-1',
+      commentId: 'comment-1',
+    });
 
     await repository.deleteLike('user-1', 'comment-1');
 
-    const result = await pool.query({
-      text: 'SELECT * FROM user_comment_likes WHERE user_id = $1 AND comment_id = $2',
-      values: ['user-1', 'comment-1'],
-    });
+    const likes = await UserCommentLikesTableTestHelper.findLike(
+      'user-1',
+      'comment-1'
+    );
 
-    expect(result.rowCount).toBe(0);
+    expect(likes).toHaveLength(0);
   });
 });

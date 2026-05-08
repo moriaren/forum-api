@@ -94,10 +94,51 @@ describe('PUT /threads/:threadId/comments/:commentId/likes', () => {
   it('should return 401 when missing authentication', async () => {
     const server = createServer();
 
+    await UsersTableTestHelper.addUser({
+      id: 'user-1',
+      username: 'john',
+    });
+
+    await ThreadsTableTestHelper.addThread({
+      id: 'thread-1',
+      owner: 'user-1',
+    });
+
+    await CommentsTableTestHelper.addComment({
+      id: 'comment-1',
+      threadId: 'thread-1',
+      owner: 'user-1',
+    });
+
     const response = await request(server)
       .put('/threads/thread-1/comments/comment-1/likes');
 
     expect(response.status).toBe(401);
     expect(response.body.status).toBe('fail');
+    expect(response.body.message).toBe('Missing authentication');
+  });
+
+  it('should handle error when thread or comment not found', async () => {
+    const server = createServer();
+
+    await UsersTableTestHelper.addUser({
+      id: 'user-1',
+      username: 'john',
+    });
+
+    const loginRes = await request(server)
+      .post('/authentications')
+      .send({
+        username: 'john',
+        password: 'secret',
+      });
+
+    const accessToken = loginRes.body.data.accessToken;
+
+    const response = await request(server)
+      .put('/threads/thread-x/comments/comment-x/likes')
+      .set('Authorization', `Bearer ${accessToken}`);
+
+    expect(response.status).toBeGreaterThanOrEqual(400);
   });
 });

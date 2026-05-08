@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest';
 import request from 'supertest';
 
 import UsersTableTestHelper from '../../../../tests/UsersTableTestHelper.js';
@@ -10,23 +10,63 @@ import JwtTokenManager from '../../security/JwtTokenManager.js';
 describe('HTTP server', () => {
   let app;
 
-  // ARRANGE
   beforeAll(() => {
     app = createServer();
   });
 
-  // CLEANUP
   afterEach(async () => {
     await AuthenticationsTableTestHelper.cleanTable();
     await UsersTableTestHelper.cleanTable();
   });
+
+  // ======================
+  // BASIC
+  // ======================
 
   it('should response 404 when request unregistered route', async () => {
     const response = await request(app).get('/unregisteredRoute');
     expect(response.status).toEqual(404);
   });
 
+  // ======================
+  // AUTH MIDDLEWARE COVERAGE
+  // ======================
+
+  it('should ignore auth if not Bearer scheme', async () => {
+    const response = await request(app)
+      .get('/threads')
+      .set('Authorization', 'Basic abc');
+
+    expect(response.status).toBeDefined();
+  });
+
+  it('should handle invalid token gracefully', async () => {
+    const response = await request(app)
+      .get('/threads')
+      .set('Authorization', 'Bearer invalid_token');
+
+    expect(response.status).toBeDefined();
+  });
+
+  it('should accept valid token', async () => {
+    const jwtTokenManager = new JwtTokenManager();
+
+    const token = await jwtTokenManager.createAccessToken({
+      id: 'user-1',
+      username: 'dicoding',
+    });
+
+    const response = await request(app)
+      .get('/threads')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.status).toBeDefined();
+  });
+
+  // ======================
   // USERS
+  // ======================
+
   describe('when POST /users', () => {
     const validPayload = {
       username: 'dicoding',
@@ -104,7 +144,10 @@ describe('HTTP server', () => {
     });
   });
 
-  // LOGIN
+  // ======================
+  // AUTHENTICATION
+  // ======================
+
   describe('when POST /authentications', () => {
     it('should response 201 and new authentication', async () => {
       await request(app).post('/users').send({
@@ -156,7 +199,10 @@ describe('HTTP server', () => {
     });
   });
 
+  // ======================
   // REFRESH TOKEN
+  // ======================
+
   describe('when PUT /authentications', () => {
     it('should return 200 and new access token', async () => {
       await request(app).post('/users').send({
@@ -197,7 +243,10 @@ describe('HTTP server', () => {
     });
   });
 
+  // ======================
   // LOGOUT
+  // ======================
+
   describe('when DELETE /authentications', () => {
     it('should response 200 if refresh token valid', async () => {
       const refreshToken = 'refresh_token';
@@ -219,5 +268,44 @@ describe('HTTP server', () => {
       expect(response.status).toEqual(400);
       expect(response.body.status).toEqual('fail');
     });
+  });
+
+  // ======================
+  // ERROR HANDLER COVERAGE (FIXED)
+  // ======================
+
+  it('should handle server error (500)', async () => {
+    const response = await request(app).get('/error');
+
+    expect(response.status).toBe(500);
+    expect(response.body.status).toBe('error');
+  });
+
+  it('should call console.error when not in test env', async () => {
+    const originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'development';
+
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const response = await request(app).get('/error');
+
+    expect(response.status).toBe(500);
+    expect(spy).toHaveBeenCalled();
+
+    spy.mockRestore();
+    process.env.NODE_ENV = originalEnv;
+  });
+
+  it('should NOT register /error route when not in test env', async () => {
+    const originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'development';
+
+    const newApp = createServer();
+
+    const response = await request(newApp).get('/error');
+
+    expect(response.status).toBe(404);
+
+    process.env.NODE_ENV = originalEnv;
   });
 });

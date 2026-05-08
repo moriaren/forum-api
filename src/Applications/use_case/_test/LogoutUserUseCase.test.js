@@ -53,4 +53,13 @@ describe('LogoutUserUseCase', () => {
     expect(mockAuthenticationRepository.deleteToken)
       .toHaveBeenCalledWith(refreshToken);
   });
+
+  it('should throw error when useCasePayload is undefined', async () => {
+    const useCase = new LogoutUserUseCase({
+      authenticationRepository: {},
+    });
+
+    await expect(useCase.execute())
+      .rejects.toThrow(InvariantError);
+  });
 });

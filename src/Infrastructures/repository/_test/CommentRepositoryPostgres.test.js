@@ -162,4 +162,27 @@ describe('CommentRepositoryPostgres', () => {
 
     expect(comments).toEqual([]);
   });
+
+  it('should get comment by id correctly', async () => {
+    await setup();
+
+    await CommentsTableTestHelper.addComment({
+      id: 'comment-1',
+      content: 'comment',
+      threadId: 'thread-1',
+      owner: 'user-1',
+    });
+
+    const comment = await repo.getCommentById('comment-1');
+
+    expect(comment).toEqual({
+      id: 'comment-1',
+      owner: 'user-1',
+    });
+  });
+
+  it('should throw NotFoundError when comment not found', async () => {
+    await expect(repo.getCommentById('comment-x'))
+      .rejects.toThrowError('COMMENT.NOT_FOUND');
+  });
 });

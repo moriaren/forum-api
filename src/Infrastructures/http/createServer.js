@@ -164,6 +164,15 @@ const createServer = () => {
   app.use('/threads', likes(container));
 
   // ======================
+  // TEST ROUTE (ONLY FOR TESTING)
+  // ======================
+  if (process.env.NODE_ENV === 'test') {
+    app.get('/error', (req, res, next) => {
+      next(new Error('unexpected'));
+    });
+  }
+
+  // ======================
   // 404 Handler
   // ======================
 

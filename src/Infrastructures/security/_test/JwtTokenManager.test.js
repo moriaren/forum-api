@@ -84,4 +84,54 @@ describe('JwtTokenManager', () => {
       expect(expectedUsername).toEqual('dicoding');
     });
   });
+
+  it('should throw InvariantError when access token invalid', async () => {
+  // Arrange
+    const jwtTokenManager = new JwtTokenManager(jwt);
+
+    // Action & Assert
+    await expect(jwtTokenManager.decodePayload('invalid_token'))
+      .rejects
+      .toThrow(InvariantError);
+  });
+
+  it('should use fallback secret keys when config and env are unavailable', async () => {
+  // Arrange
+    const originalAccessKey = config.auth.accessTokenKey;
+    const originalRefreshKey = config.auth.refreshTokenKey;
+
+    config.auth.accessTokenKey = '';
+    config.auth.refreshTokenKey = '';
+
+    delete process.env.ACCESS_TOKEN_KEY;
+    delete process.env.REFRESH_TOKEN_KEY;
+
+    const mockJwtToken = {
+      sign: vi.fn().mockReturnValue('mock_token'),
+      verify: vi.fn().mockReturnValue({ username: 'dicoding' }),
+    };
+
+    const jwtTokenManager = new JwtTokenManager(mockJwtToken);
+
+    // Act
+    jwtTokenManager.generateAccessToken({ username: 'dicoding' });
+    jwtTokenManager.generateRefreshToken({ username: 'dicoding' });
+
+    // Assert
+    expect(mockJwtToken.sign).toHaveBeenCalledWith(
+      { username: 'dicoding' },
+      'secret',
+      { expiresIn: '1h' }
+    );
+
+    expect(mockJwtToken.sign).toHaveBeenCalledWith(
+      { username: 'dicoding' },
+      'refresh',
+      { expiresIn: '7d' }
+    );
+
+    // cleanup
+    config.auth.accessTokenKey = originalAccessKey;
+    config.auth.refreshTokenKey = originalRefreshKey;
+  });
 });
